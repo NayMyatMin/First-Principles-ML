@@ -1,0 +1,30 @@
+<style>
+  .prop-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 18px;margin:8px 0}
+  .prop-name{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px}
+  .prop-formula{font-family:var(--font-mono);font-size:13px;color:var(--color-text-info);margin:0 0 6px}
+  .prop-why{font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin:0}
+  .prop-why b{font-weight:500;color:var(--color-text-primary)}
+  .prop-badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;margin-left:8px}
+  .badge-no{background:#FCEBEB;color:#791F1F}
+  .badge-yes{background:#EAF3DE;color:#27500A}
+</style>
+<div class="prop-card">
+  <p class="prop-name">Not commutative <span class="prop-badge badge-no">AB ≠ BA</span></p>
+  <p class="prop-formula">AB ≠ BA in general (BA may not even be defined)</p>
+  <p class="prop-why"><b>ML connection:</b> Layer order matters. A network computing W₂(W₁x) is different from W₁(W₂x). Swapping layers changes the function entirely.</p>
+</div>
+<div class="prop-card">
+  <p class="prop-name">Associative <span class="prop-badge badge-yes">A(BC) = (AB)C</span></p>
+  <p class="prop-formula">A(BC) = (AB)C — grouping doesn't matter</p>
+  <p class="prop-why"><b>ML connection:</b> You can compute W₂(W₁x) as a sequence of mat-vec products (cheap) or first compute (W₂W₁) then multiply by x. Same result, different cost. Choose the cheaper path.</p>
+</div>
+<div class="prop-card">
+  <p class="prop-name">Distributive <span class="prop-badge badge-yes">A(B+C) = AB + AC</span></p>
+  <p class="prop-formula">A(B + C) = AB + AC</p>
+  <p class="prop-why"><b>ML connection:</b> Used in deriving gradient expressions. If the loss depends on two terms, you can distribute the upstream gradient across them independently.</p>
+</div>
+<div class="prop-card">
+  <p class="prop-name">Transpose reverses order <span class="prop-badge badge-yes">(AB)ᵀ = BᵀAᵀ</span></p>
+  <p class="prop-formula">(AB)ᵀ = BᵀAᵀ — the order flips!</p>
+  <p class="prop-why"><b>ML connection:</b> This shows up <b>directly in backpropagation</b>. When computing gradients, you need transposed weight matrices, and this identity tells you the order reverses through the chain rule. This is the most practically important property for deep learning.</p>
+</div>

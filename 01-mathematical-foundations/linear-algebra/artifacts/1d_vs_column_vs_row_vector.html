@@ -1,0 +1,35 @@
+<style>
+  .shape-row{display:flex;gap:16px;align-items:flex-start;margin:10px 0;flex-wrap:wrap}
+  .shape-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 18px;flex:1;min-width:180px}
+  .sh-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px}
+  .sh-shape{font-family:var(--font-mono);font-size:12px;color:var(--color-text-info);margin:0 0 10px}
+  .sh-note{font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin:10px 0 0}
+  .sh-note b{font-weight:500;color:var(--color-text-primary)}
+  .c{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:13px;font-weight:500;background:#E1F5EE;color:#085041;margin:1px}
+</style>
+<div class="shape-row">
+  <div class="shape-card">
+    <p class="sh-title">1D array</p>
+    <p class="sh-shape">shape = (3,) &nbsp; ndim = 1</p>
+    <div style="display:flex;gap:1px">
+      <div class="c">1</div><div class="c">2</div><div class="c">3</div>
+    </div>
+    <p class="sh-note"><b>Neither row nor column.</b> NumPy treats it as a row on the left of @ and a column on the right of @. Convenient but can be confusing.</p>
+  </div>
+  <div class="shape-card">
+    <p class="sh-title">Column vector</p>
+    <p class="sh-shape">shape = (3, 1) &nbsp; ndim = 2</p>
+    <div style="display:flex;flex-direction:column;gap:1px;width:fit-content">
+      <div class="c">1</div><div class="c">2</div><div class="c">3</div>
+    </div>
+    <p class="sh-note"><b>The math default.</b> When textbooks write x ∈ ℝⁿ, they mean this — a column. Created via <code style="font-size:11px">v.reshape(-1, 1)</code>.</p>
+  </div>
+  <div class="shape-card">
+    <p class="sh-title">Row vector</p>
+    <p class="sh-shape">shape = (1, 3) &nbsp; ndim = 2</p>
+    <div style="display:flex;gap:1px">
+      <div class="c">1</div><div class="c">2</div><div class="c">3</div>
+    </div>
+    <p class="sh-note"><b>The transpose of a column.</b> xᵀ turns (n,1) into (1,n). Created via <code style="font-size:11px">v.reshape(1, -1)</code>.</p>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<style>
+  .hg-row{display:flex;align-items:center;hg_gap:8px;margin:4px 0;font-size:13px}
+  .hg-hg_label{min-width:60px;color:var(--color-text-secondary);font-size:12px}
+  .hg-val{min-width:36px;text-align:right;font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--color-text-primary)}
+  .hg-note{font-size:13px;color:var(--color-text-secondary);margin:10px 0 0;line-height:1.7}
+  .hg-note b{color:var(--color-text-primary);font-weight:500}
+</style>
+<hg_svg id="hg" width="100%" viewBox="0 0 680 240"></hg_svg>
+<div style="margin:10px 0 0">
+  <div class="hg-row" style="margin-bottom:6px"><span class="hg-hg_label" style="font-weight:500;color:var(--color-text-primary)">Drag hg_gates:</span></div>
+</div>
+<div id="hg-sliders"></div>
+<div class="hg-note" id="hg-note"></div>
+<script>
+const hg_acts=[0.8,-0.5,1.2,0.3,-0.9];
+const hg_gates=[1.0,0.0,0.7,1.0,0.1];
+const hg_n=5;
+const hg_names=['h₁','h₂','h₃','h₄','h₅'];
+
+let hg_sl=document.getElementById('hg-sliders');
+let hg_h='';
+for(let i=0;i<hg_n;i++){
+  hg_h+=`<div class="hg-row"><span class="hg-hg_label">${hg_names[i]} gate</span><input type="range" min="0" max="100" value="${Math.round(hg_gates[i]*100)}" step="1" style="flex:1" oninput="hg_sg(${i},this.value)"><span class="hg-val" id="gv${i}">${hg_gates[i].toFixed(2)}</span></div>`;
+}
+hg_sl.innerHTML=hg_h;
+
+function hg_sg(i,v){hg_gates[i]=v/100;document.getElementById('gv'+i).textContent=hg_gates[i].toFixed(2);hg_render();}
+
+function hg_render(){
+  const hg_out=hg_acts.map((hg_a,i)=>hg_a*hg_gates[i]);
+  const hg_svg=document.getElementById('hg');
+  const hg_bw=80,hg_gap=16,hg_bh=28;
+  const hg_totalW=hg_n*hg_bw+(hg_n-1)*hg_gap;
+  const hg_sx=(680-hg_totalW)/2;
+  let s='';
+
+  const hg_rows=[
+    {vals:hg_acts,y:40,hg_label:'Activation',hg_bg:'#E6F1FB',fg:'#0C447C'},
+    {vals:hg_gates,y:90,hg_label:'Gate (0-1)',hg_bg:'#FAEEDA',fg:'#633806'},
+    {vals:hg_out,y:170,hg_label:'Output',hg_bg:null,fg:null}
+  ];
+
+  for(let ri=0;ri<3;ri++){
+    const r=hg_rows[ri];
+    s+=`<text class="ts" x="${hg_sx-10}" y="${r.y+hg_bh/2}" text-anchor="end" dominant-baseline="central" fill="var(--color-text-secondary)">${r.hg_label}</text>`;
+    for(let i=0;i<hg_n;i++){
+      const hg_bx=hg_sx+i*(hg_bw+hg_gap);
+      const v=r.vals[i];
+      let hg_bg,fg;
+      if(ri===2){
+        const hg_g=hg_gates[i];
+        if(hg_g<0.05){hg_bg='var(--color-background-secondary)';fg='var(--color-text-secondary)';}
+        else if(v>=0){hg_bg='#EAF3DE';fg='#27500A';}
+        else{hg_bg='#FCEBEB';fg='#791F1F';}
+      } else {
+        hg_bg=r.hg_bg;fg=r.fg;
+      }
+      s+=`<rect x="${hg_bx}" y="${r.y}" width="${hg_bw}" height="${hg_bh}" rx="5" fill="${hg_bg}"/>`;
+      s+=`<text class="t" x="${hg_bx+hg_bw/2}" y="${r.y+hg_bh/2}" text-anchor="middle" dominant-baseline="central" fill="${fg}" style="font-family:var(--font-mono);font-size:13px;font-weight:500">${v.toFixed(2)}</text>`;
+      if(ri===0){
+        s+=`<text class="ts" x="${hg_bx+hg_bw/2}" y="${r.y-8}" text-anchor="middle" fill="var(--color-text-secondary)">${hg_names[i]}</text>`;
+      }
+    }
+    if(ri===0){
+      s+=`<text class="ts" x="${hg_sx+hg_totalW/2}" y="${hg_rows[0].y+hg_bh+20}" text-anchor="middle" fill="var(--color-text-secondary)" style="font-size:16px">⊙</text>`;
+    }
+    if(ri===1){
+      const hg_arrowY=r.y+hg_bh+12;
+      for(let i=0;i<hg_n;i++){
+        const hg_bx=hg_sx+i*(hg_bw+hg_gap)+hg_bw/2;
+        const hg_g=hg_gates[i];
+        const hg_label=hg_g<0.05?'hg_blocked':hg_g>0.95?'hg_passed':'hg_partial';
+        const hg_lc=hg_g<0.05?'#A32D2D':hg_g>0.95?'#3B6D11':'#854F0B';
+        s+=`<text class="ts" x="${hg_bx}" y="${hg_arrowY+6}" text-anchor="middle" fill="${hg_lc}" style="font-weight:500">${hg_label}</text>`;
+      }
+    }
+  }
+
+  hg_svg.innerHTML=s;
+
+  let hg_blocked=0,hg_partial=0,hg_passed=0;
+  hg_gates.forEach(hg_g=>{if(hg_g<0.05)hg_blocked++;else if(hg_g>0.95)hg_passed++;else hg_partial++;});
+  document.getElementById('hg-note').innerHTML=`<b>Hadamard product in action:</b> Each activation is independently multiplied by its gate value. Gate = 1 means "remember" (fully pass). Gate = 0 means "forget" (fully block). Values in between give hg_partial filtering. This is exactly how the <b>LSTM forget gate</b> works — hg_a sigmoid produces the gate values, and ⊙ with the cell state selectively retains or erases each dimension of memory.`;
+}
+hg_render();
+
+</script>

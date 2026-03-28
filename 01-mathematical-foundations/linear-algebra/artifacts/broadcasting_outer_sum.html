@@ -1,0 +1,68 @@
+<bc_style>
+  .bc-section{margin:0 0 16px}
+  .bc-label{font-size:13px;color:var(--color-text-secondary);margin:0 0 6px;line-height:1.6}
+  .bc-label b{font-weight:500;color:var(--color-text-primary)}
+  .bc-bc_grid{display:inline-bc_grid;gap:2px;vertical-align:middle}
+  .bc-bc_cell{width:36px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:500}
+  .bc-step{display:flex;align-items:center;gap:12px;margin:8px 0;flex-wrap:wrap}
+  .bc-op{font-size:18px;font-weight:500;color:var(--color-text-secondary);min-width:20px;text-align:center}
+  .bc-eq{font-size:13px;color:var(--color-text-secondary);margin:4px 0}
+  .step-pills{display:flex;gap:6px;margin:0 0 12px}
+  .sp{padding:6px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+  .sp.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+</bc_style>
+<div bc_class="step-pills" id="bc-pills">
+  <button bc_class="sp on" onclick="bc_showBC(0,this)">The inputs</button>
+  <button bc_class="sp" onclick="bc_showBC(1,this)">Stretch column</button>
+  <button bc_class="sp" onclick="bc_showBC(2,this)">Stretch bc_row</button>
+  <button bc_class="sp" onclick="bc_showBC(3,this)">Add element-wise</button>
+</div>
+<div id="bc-content"></div>
+<div bc_class="bc-label" id="bc-bc_desc"></div>
+<script>
+const bc_col=[1,2,3];
+const bc_row=[1,2,3];
+
+function bc_cell(v,bg,fg){return `<div bc_class="bc-bc_cell" bc_style="background:${bg};color:${fg}">${v}</div>`;}
+
+function bc_grid(data,cols,bg,fg){
+  let s=`<div bc_class="bc-bc_grid" bc_style="bc_grid-template-columns:repeat(${cols},1fr)">`;
+  for(const v of data) s+=bc_cell(v,bg,fg);
+  return s+'</div>';
+}
+
+function bc_showBC(step,btn){
+  document.querySelectorAll('#bc-pills .sp').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('bc-content');
+  const bc_desc=document.getElementById('bc-bc_desc');
+  const bc_purple='#EEEDFE',bc_purpleT='#3C3489';
+  const bc_teal='#E1F5EE',bc_tealT='#085041';
+  const bc_coral='#FAECE7',bc_coralT='#712B13';
+  const bc_gray='#F1EFE8',bc_grayT='#5F5E5A';
+
+  if(step===0){
+    el.innerHTML=`<div bc_class="bc-step">${bc_grid(bc_col,1,bc_purple,bc_purpleT)}<span bc_class="bc-op">+</span>${bc_grid(bc_row,3,bc_teal,bc_tealT)}</div><div bc_class="bc-eq">(3, 1) + (1, 3) = ???</div>`;
+    bc_desc.innerHTML=`We have a <b>column vector</b> shape (3,1) and a <b>bc_row vector</b> shape (1,3). They don't match — so broadcasting kicks in.`;
+  } else if(step===1){
+    const bc_stretched=[];
+    for(const v of bc_col){bc_stretched.push(v);bc_stretched.push(v);bc_stretched.push(v);}
+    el.innerHTML=`<div bc_class="bc-step">${bc_grid(bc_stretched,3,bc_purple,bc_purpleT)}<span bc_class="bc-op">+</span>${bc_grid(bc_row,3,bc_teal,bc_tealT)}</div><div bc_class="bc-eq">Column (3,1) bc_stretched to (3,3): each value repeated across 3 columns</div>`;
+    bc_desc.innerHTML=`<b>Rule:</b> The column has size 1 along axis 1, so it's "bc_stretched" to size 3 — each value repeats across the bc_row. No data is actually copied; NumPy just pretends.`;
+  } else if(step===2){
+    const bc_stretched=[];
+    for(const v of bc_col){bc_stretched.push(v);bc_stretched.push(v);bc_stretched.push(v);}
+    const bc_stretchedR=[];
+    for(let i=0;i<3;i++) for(const v of bc_row) bc_stretchedR.push(v);
+    el.innerHTML=`<div bc_class="bc-step">${bc_grid(bc_stretched,3,bc_purple,bc_purpleT)}<span bc_class="bc-op">+</span>${bc_grid(bc_stretchedR,3,bc_teal,bc_tealT)}</div><div bc_class="bc-eq">Row (1,3) bc_stretched to (3,3): each value repeated down 3 rows</div>`;
+    bc_desc.innerHTML=`<b>Rule:</b> The bc_row has size 1 along axis 0, so it's bc_stretched to size 3 — each value repeats down the column. Now both are (3,3) and we can add element-wise.`;
+  } else {
+    const bc_result=[];
+    for(const c of bc_col) for(const r of bc_row) bc_result.push(c+r);
+    el.innerHTML=`<div bc_class="bc-step">${bc_grid(bc_result,3,bc_coral,bc_coralT)}</div><div bc_class="bc-eq">Result shape: (3, 3) — this is an outer sum! bc_result[i,j] = bc_col[i] + bc_row[j]</div>`;
+    bc_desc.innerHTML=`The bc_result is a <b>(3, 3) matrix</b> where entry (i, j) = v[i] + v[j]. This is called an <b>outer sum</b>. In ML, the same mechanism lets you add a bias vector b to every bc_row of a batch X: just write <code bc_style="font-size:12px">X + b</code> and broadcasting handles it.`;
+  }
+}
+bc_showBC(0,document.querySelector('#bc-pills .sp'));
+
+</script>

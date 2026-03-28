@@ -49,3 +49,7 @@ mlruns/
 
 # Personal working/practice folders
 **/Working/
+
+# Claude Code
+.claude/
+CLAUDE.md

@@ -1,0 +1,89 @@
+<style>
+  .mv-step{display:flex;mv_gap:6px;margin:0 0 10px;flex-wrap:wrap}
+  .mv-btn{padding:6px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+  .mv-btn.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+  .mv-note{font-size:13px;color:var(--color-text-secondary);margin:8px 0 0;line-height:1.7}
+  .mv-note b{font-weight:500;color:var(--color-text-primary)}
+</style>
+<div class="mv-step">
+  <button class="mv-btn on" onclick="mv_showRow(-1,this)">Full picture</button>
+  <button class="mv-btn" onclick="mv_showRow(0,this)">Row 0 · mv_x → y₀</button>
+  <button class="mv-btn" onclick="mv_showRow(1,this)">Row 1 · mv_x → y₁</button>
+  <button class="mv-btn" onclick="mv_showRow(2,this)">Row 2 · mv_x → y₂</button>
+</div>
+<mv_svg id="mv-mv_svg" width="100%" viewBox="0 0 680 220"></mv_svg>
+<div class="mv-note" id="mv-note"></div>
+<script>
+const mv_A=[[2,-1,3],[1,2,-1],[0,3,1]];
+const mv_x=[1,2,-1];
+const mv_y=mv_A.map(mv_row=>mv_row.reduce((s,v,j)=>s+v*mv_x[j],0));
+const mv_colors=[['#EEEDFE','#3C3489'],['#E1F5EE','#085041'],['#FAECE7','#712B13']];
+const mv_xc=['#E6F1FB','#0C447C'];
+
+function mv_showRow(mv_sel,btn){
+  document.querySelectorAll('.mv-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const mv_svg=document.getElementById('mv-mv_svg');
+  let s='';
+  const mv_cw=42,mv_ch=34,mv_gap=2,mv_pad=4;
+  const mv_ax=60,mv_ay=30;
+  const mv_xx=260,mv_xy=30;
+  const mv_yx=420,mv_yy=30;
+
+  s+=`<text class="ts" mv_x="${mv_ax+mv_cw*1.5}" mv_y="18" text-anchor="middle">mv_A (3×3)</text>`;
+  s+=`<text class="ts" mv_x="${mv_xx+mv_cw/2}" mv_y="18" text-anchor="middle">mv_x (3)</text>`;
+  s+=`<text class="ts" mv_x="${mv_yx+mv_cw/2}" mv_y="18" text-anchor="middle">mv_y = Ax</text>`;
+
+  for(let i=0;i<3;i++){
+    const mv_rowActive=mv_sel===-1||mv_sel===i;
+    const mv_op=mv_rowActive?1:0.2;
+    for(let j=0;j<3;j++){
+      const mv_cx=mv_ax+j*(mv_cw+mv_gap), mv_cy=mv_ay+i*(mv_ch+mv_gap);
+      s+=`<rect mv_x="${mv_cx}" mv_y="${mv_cy}" width="${mv_cw}" height="${mv_ch}" rx="4" fill="${mv_colors[i][0]}" opacity="${mv_op}"/>`;
+      s+=`<text class="t" mv_x="${mv_cx+mv_cw/2}" mv_y="${mv_cy+mv_ch/2}" text-anchor="middle" dominant-baseline="central" fill="${mv_colors[i][1]}" opacity="${mv_op}" style="font-family:var(--font-mono);font-size:13px">${mv_A[i][j]}</text>`;
+    }
+    const mv_xcy=mv_xy+i*(mv_ch+mv_gap);
+    const mv_xActive=mv_sel===-1||(mv_sel===i);
+    const mv_xop=mv_xActive?1:0.2;
+    s+=`<rect mv_x="${mv_xx}" mv_y="${mv_xcy}" width="${mv_cw}" height="${mv_ch}" rx="4" fill="${mv_xc[0]}" opacity="${mv_xop}"/>`;
+    s+=`<text class="t" mv_x="${mv_xx+mv_cw/2}" mv_y="${mv_xcy+mv_ch/2}" text-anchor="middle" dominant-baseline="central" fill="${mv_xc[1]}" opacity="${mv_xop}" style="font-family:var(--font-mono);font-size:13px">${mv_x[i]}</text>`;
+
+    const mv_ycy=mv_yy+i*(mv_ch+mv_gap);
+    const mv_yActive=mv_sel===-1||mv_sel===i;
+    const mv_yop=mv_yActive?1:0.2;
+    s+=`<rect mv_x="${mv_yx}" mv_y="${mv_ycy}" width="${mv_cw}" height="${mv_ch}" rx="4" fill="${mv_colors[i][0]}" opacity="${mv_yop}"/>`;
+    s+=`<text class="t" mv_x="${mv_yx+mv_cw/2}" mv_y="${mv_ycy+mv_ch/2}" text-anchor="middle" dominant-baseline="central" fill="${mv_colors[i][1]}" opacity="${mv_yop}" style="font-family:var(--font-mono);font-size:13px;font-weight:500">${mv_y[i]}</text>`;
+  }
+
+  if(mv_sel>=0){
+    const mv_ry=mv_ay+mv_sel*(mv_ch+mv_gap)+mv_ch/2;
+    const mv_rowy=mv_yy+mv_sel*(mv_ch+mv_gap)+mv_ch/2;
+    s+=`<line x1="${mv_ax+3*(mv_cw+mv_gap)}" y1="${mv_ry}" x2="${mv_xx-12}" y2="${mv_ry}" stroke="${mv_colors[mv_sel][1]}" stroke-width="1" opacity="0.4" stroke-dasharray="3 3"/>`;
+    s+=`<line x1="${mv_xx+mv_cw+8}" y1="${mv_rowy}" x2="${mv_yx-12}" y2="${mv_rowy}" stroke="${mv_colors[mv_sel][1]}" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow)"/>`;
+  }
+
+  const mv_eqY=160;
+  if(mv_sel>=0){
+    const r=mv_A[mv_sel];
+    s+=`<text class="t" mv_x="340" mv_y="${mv_eqY}" text-anchor="middle" style="font-family:var(--font-mono);font-size:13px" fill="var(--color-text-primary)">mv_y${mv_sel} = (${r[0]})(${mv_x[0]}) + (${r[1]})(${mv_x[1]}) + (${r[2]})(${mv_x[2]}) = ${r[0]*mv_x[0]} + ${r[1]*mv_x[1]} + ${r[2]*mv_x[2]} = ${mv_y[mv_sel]}</text>`;
+  } else {
+    for(let i=0;i<3;i++){
+      const r=mv_A[i];
+      s+=`<text class="ts" mv_x="340" mv_y="${mv_eqY+i*18}" text-anchor="middle" style="font-family:var(--font-mono)" fill="${mv_colors[i][1]}">mv_y${i} = mv_row${i} · mv_x = (${r[0]})(${mv_x[0]}) + (${r[1]})(${mv_x[1]}) + (${r[2]})(${mv_x[2]}) = ${mv_y[i]}</text>`;
+    }
+  }
+
+  s+=`<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+  mv_svg.innerHTML=s;
+
+  const mv_descs=[
+    `Each output element yᵢ is the <b>dot product</b> of mv_row i of mv_A with mv_x. Three rows → three dot products → three outputs. This is the <b>mv_row-dot-product view</b> of matrix-vector multiplication.`,
+    `<b>y₀ = row₀ · mv_x</b> = (2)(1) + (-1)(2) + (3)(-1) = 2 - 2 - 3 = <b>-3</b>. The first mv_row of mv_A acts as a "template" — the dot product measures how well mv_x matches it.`,
+    `<b>y₁ = row₁ · mv_x</b> = (1)(1) + (2)(2) + (-1)(-1) = 1 + 4 + 1 = <b>6</b>. This mv_row matches mv_x well — the dot product is large and positive.`,
+    `<b>y₂ = row₂ · mv_x</b> = (0)(1) + (3)(2) + (1)(-1) = 0 + 6 - 1 = <b>5</b>. Each mv_row "asks a different question" about mv_x, and the dot product is the answer.`
+  ];
+  document.getElementById('mv-note').innerHTML=mv_descs[mv_sel+1];
+}
+mv_showRow(-1,document.querySelector('.mv-btn'));
+
+</script>

@@ -1,0 +1,120 @@
+<style>
+  .lt-pills{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+  .lt-btn{padding:7px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+  .lt-btn.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+  .lt-ctrl{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13px;color:var(--color-text-secondary)}
+  .lt-ctrl span{min-width:50px;text-align:right;font-weight:500;font-size:13px;color:var(--color-text-primary)}
+  .lt-note{font-size:13px;color:var(--color-text-secondary);margin:8px 0 0;line-height:1.7}
+  .lt-note b{color:var(--color-text-primary);font-weight:500}
+</style>
+<div class="lt-pills">
+  <button class="lt-btn on" onclick="lt_setLT(0,this)">Rotation</button>
+  <button class="lt-btn" onclick="lt_setLT(1,this)">Shear</button>
+  <button class="lt-btn" onclick="lt_setLT(2,this)">Scaling</button>
+  <button class="lt-btn" onclick="lt_setLT(3,this)">Projection</button>
+</div>
+<div class="lt-ctrl">
+  <label id="lt-label">Angle</label>
+  <input type="range" id="lt-param" min="0" max="100" value="33" step="1" style="flex:1" oninput="lt_ltDraw()">
+  <span id="lt-pval">30°</span>
+</div>
+<lt_svg id="lt-lt_svg" width="100%" viewBox="0 0 680 320"></lt_svg>
+<div class="lt-note" id="lt-note"></div>
+<script>
+let lt_ltMode=0;
+const lt_N=200;
+
+function lt_getM(lt_p){
+  switch(lt_ltMode){
+    case 0:{const a=lt_p*Math.PI*2;return[Math.cos(a),-Math.sin(a),Math.sin(a),Math.cos(a)];}
+    case 1:{const k=lt_p*3-1.5;return[1,k,0,1];}
+    case 2:{const sx=0.3+lt_p*2.4,sy=0.3+(1-lt_p)*2.4;return[sx,0,0,sy];}
+    case 3:{const a=lt_p*Math.PI;const c=Math.cos(a),sn=Math.sin(a);return[c*c,c*sn,c*sn,sn*sn];}
+  }
+}
+
+const lt_labels=['Angle','Shear factor','Balance','Projection axis'];
+const lt_fmts=[
+  lt_p=>(lt_p*360).toFixed(0)+'°',
+  lt_p=>(lt_p*3-1.5).toFixed(1),
+  lt_p=>'sx='+(0.3+lt_p*2.4).toFixed(1),
+  lt_p=>(lt_p*180).toFixed(0)+'°'
+];
+
+function lt_setLT(lt_m,btn){
+  lt_ltMode=lt_m;
+  document.querySelectorAll('.lt-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('lt-label').textContent=lt_labels[lt_m];
+  lt_ltDraw();
+}
+
+function lt_ltDraw(){
+  const lt_p=+document.getElementById('lt-param').value/100;
+  document.getElementById('lt-pval').textContent=lt_fmts[lt_ltMode](lt_p);
+  const lt_m=lt_getM(lt_p);
+  const lt_det=lt_m[0]*lt_m[3]-lt_m[1]*lt_m[2];
+
+  const lt_svg=document.getElementById('lt-lt_svg');
+  const lt_cx1=170,lt_cx2=510,lt_cy=165,lt_sc=110;
+
+  let s='';
+  for(const cxo of[lt_cx1,lt_cx2]){
+    for(let i=-2;i<=2;i++){
+      const lt_gx=cxo+i*lt_sc,lt_gy=lt_cy-i*lt_sc;
+      if(lt_gx>40&&lt_gx<640)s+=`<line x1="${lt_gx}" y1="10" x2="${lt_gx}" y2="310" stroke="var(--color-border-tertiary)" stroke-width="0.3"/>`;
+      if(lt_gy>10&&lt_gy<310)s+=`<line x1="${cxo-lt_sc*1.5}" y1="${lt_gy}" x2="${cxo+lt_sc*1.5}" y2="${lt_gy}" stroke="var(--color-border-tertiary)" stroke-width="0.3"/>`;
+    }
+    s+=`<line x1="${cxo-lt_sc*1.5}" y1="${lt_cy}" x2="${cxo+lt_sc*1.5}" y2="${lt_cy}" stroke="var(--color-text-secondary)" stroke-width="0.4"/>`;
+    s+=`<line x1="${cxo}" y1="${lt_cy-lt_sc*1.5}" x2="${cxo}" y2="${lt_cy+lt_sc*1.5}" stroke="var(--color-text-secondary)" stroke-width="0.4"/>`;
+  }
+
+  const lt_pts=[];
+  for(let i=0;i<=lt_N;i++){const a=2*Math.PI*i/lt_N;lt_pts.push([Math.cos(a),Math.sin(a)]);}
+  const lt_tpts=lt_pts.map(([lt_x,lt_y])=>[lt_m[0]*lt_x+lt_m[1]*lt_y,lt_m[2]*lt_x+lt_m[3]*lt_y]);
+
+  let lt_d1='M',lt_d2='M';
+  for(let i=0;i<=lt_N;i++){
+    const [lt_ox,oy]=lt_pts[i];
+    const [lt_tx,lt_ty]=lt_tpts[i];
+    if(i>0){lt_d1+='L';lt_d2+='L';}
+    lt_d1+=`${(lt_cx1+lt_ox*lt_sc).toFixed(1)} ${(lt_cy-oy*lt_sc).toFixed(1)} `;
+    lt_d2+=`${(lt_cx2+lt_tx*lt_sc).toFixed(1)} ${(lt_cy-lt_ty*lt_sc).toFixed(1)} `;
+  }
+  s+=`<path d="${lt_d1}" fill="none" stroke="#85B7EB" stroke-width="2" opacity="0.7"/>`;
+  s+=`<path d="${lt_d2}" fill="none" stroke="#A32D2D" stroke-width="2.5"/>`;
+
+  const lt_gpts=[];
+  for(let v=-1.5;v<=1.5;v+=0.5){
+    const lt_h=[],lt_vl=[];
+    for(let i=0;i<=40;i++){const t=-1.5+3*i/40;lt_h.push([t,v]);lt_vl.push([v,t]);}
+    lt_gpts.push(lt_h,lt_vl);
+  }
+  for(const line of lt_gpts){
+    let lt_gd='M';
+    for(let i=0;i<line.length;i++){
+      const [lt_x,lt_y]=line[i];
+      const lt_tx=lt_m[0]*lt_x+lt_m[1]*lt_y,lt_ty=lt_m[2]*lt_x+lt_m[3]*lt_y;
+      if(i>0)lt_gd+='L';
+      lt_gd+=`${(lt_cx2+lt_tx*lt_sc).toFixed(1)} ${(lt_cy-lt_ty*lt_sc).toFixed(1)} `;
+    }
+    s+=`<path d="${lt_gd}" fill="none" stroke="#F0997B" stroke-width="0.5" opacity="0.35"/>`;
+  }
+
+  s+=`<text class="ts" lt_x="${lt_cx1}" lt_y="18" text-anchor="middle" fill="var(--color-text-secondary)">Original</text>`;
+  s+=`<text class="ts" lt_x="${lt_cx2}" lt_y="18" text-anchor="middle" fill="var(--color-text-secondary)">Transformed</text>`;
+
+  lt_svg.innerHTML=s;
+
+  const lt_notes=[
+    `<b>Rotation</b> (lt_det = ${lt_det.toFixed(2)}) — orthogonal matrix. The circle stays a circle: lengths, angles, and areas are all preserved. lt_det = 1 means no area change. Orthogonal initialization uses this property to prevent gradients from shrinking or exploding.`,
+    `<b>Shear</b> (lt_det = ${lt_det.toFixed(2)}) — tilts the space sideways. The circle becomes an ellipse. Area is preserved (lt_det = 1) but angles are distorted. Notice the grid lines stay straight — that's linearity! This is the kind of distortion a typical neural network layer applies to data.`,
+    `<b>Scaling</b> (lt_det = ${lt_det.toFixed(2)}) — stretches differently along each axis. The circle becomes an axis-aligned ellipse. The determinant tells you the area scaling factor. When lt_det > 1, space expands; when lt_det < 1, it shrinks.`,
+    `<b>Projection</b> (lt_det = ${lt_det.toFixed(2)}) — collapses 2D onto a line. The entire plane is crushed to a 1D subspace. <b>Information is destroyed</b> — you cannot recover the original data. lt_det = 0 signals this irreversibility. A rank-deficient weight matrix in a neural network is throwing away information.`
+  ];
+  document.getElementById('lt-note').innerHTML=lt_notes[lt_ltMode];
+}
+lt_ltDraw();
+
+
+</script>

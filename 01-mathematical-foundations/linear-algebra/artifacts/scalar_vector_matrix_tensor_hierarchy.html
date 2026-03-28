@@ -1,0 +1,68 @@
+<style>
+  .obj-row{display:flex;gap:12px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
+  .obj-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;flex:1;min-width:140px}
+  .obj-name{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px}
+  .obj-note{font-size:12px;color:var(--color-text-secondary);margin:0 0 10px;line-height:1.5}
+  .obj-viz{display:flex;align-items:center;justify-content:center;min-height:60px}
+  .cell{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:500;margin:1px}
+  .sc-cell{background:#EEEDFE;color:#3C3489}
+  .vec-cell{background:#E1F5EE;color:#085041}
+  .mat-cell{background:#E6F1FB;color:#0C447C}
+  .ten-cell{background:#FAECE7;color:#712B13}
+  .dim-badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;margin-top:8px}
+  .d0{background:#EEEDFE;color:#3C3489}
+  .d1{background:#E1F5EE;color:#085041}
+  .d2{background:#E6F1FB;color:#0C447C}
+  .d3{background:#FAECE7;color:#712B13}
+</style>
+<div class="obj-row">
+  <div class="obj-card">
+    <p class="obj-name">Scalar</p>
+    <p class="obj-note">A single number. Learning rate, loss value, pixel intensity.</p>
+    <div class="obj-viz">
+      <div class="cell sc-cell" style="width:40px;height:40px;font-size:14px">3.14</div>
+    </div>
+    <span class="dim-badge d0">ndim = 0, shape = ()</span>
+  </div>
+  <div class="obj-card">
+    <p class="obj-name">Vector</p>
+    <p class="obj-note">Ordered list. A feature vector, an embedding, a bias.</p>
+    <div class="obj-viz" style="flex-direction:column;gap:1px">
+      <div class="cell vec-cell">1.0</div>
+      <div class="cell vec-cell">2.0</div>
+      <div class="cell vec-cell">3.0</div>
+    </div>
+    <span class="dim-badge d1">ndim = 1, shape = (3,)</span>
+  </div>
+  <div class="obj-card">
+    <p class="obj-name">Matrix</p>
+    <p class="obj-note">2D grid. A weight matrix, a batch of features.</p>
+    <div class="obj-viz">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px">
+        <div class="cell mat-cell">1</div><div class="cell mat-cell">2</div><div class="cell mat-cell">3</div><div class="cell mat-cell">4</div>
+        <div class="cell mat-cell">5</div><div class="cell mat-cell">6</div><div class="cell mat-cell">7</div><div class="cell mat-cell">8</div>
+        <div class="cell mat-cell">9</div><div class="cell mat-cell">10</div><div class="cell mat-cell">11</div><div class="cell mat-cell">12</div>
+      </div>
+    </div>
+    <span class="dim-badge d2">ndim = 2, shape = (3, 4)</span>
+  </div>
+  <div class="obj-card">
+    <p class="obj-name">Tensor</p>
+    <p class="obj-note">3D+. A batch of images, a sequence of embeddings.</p>
+    <div class="obj-viz" style="position:relative;height:80px;width:120px">
+      <div style="position:absolute;top:0;left:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;opacity:0.3">
+        <div class="cell ten-cell">.</div><div class="cell ten-cell">.</div><div class="cell ten-cell">.</div>
+        <div class="cell ten-cell">.</div><div class="cell ten-cell">.</div><div class="cell ten-cell">.</div>
+      </div>
+      <div style="position:absolute;top:10px;left:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;opacity:0.6">
+        <div class="cell ten-cell">.</div><div class="cell ten-cell">.</div><div class="cell ten-cell">.</div>
+        <div class="cell ten-cell">.</div><div class="cell ten-cell">.</div><div class="cell ten-cell">.</div>
+      </div>
+      <div style="position:absolute;top:20px;left:0px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px">
+        <div class="cell ten-cell">0</div><div class="cell ten-cell">1</div><div class="cell ten-cell">2</div>
+        <div class="cell ten-cell">3</div><div class="cell ten-cell">4</div><div class="cell ten-cell">5</div>
+      </div>
+    </div>
+    <span class="dim-badge d3">ndim = 3, shape = (2, 2, 3)</span>
+  </div>
+</div>

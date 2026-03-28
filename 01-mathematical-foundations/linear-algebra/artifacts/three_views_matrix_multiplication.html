@@ -1,0 +1,93 @@
+<style>
+  .mm-pills{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+  .mm-btn{padding:7px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+  .mm-btn.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+  .mm-desc{font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin:10px 0 0}
+  .mm-desc b{font-weight:500;color:var(--color-text-primary)}
+  .mm-desc code{font-size:12px;background:var(--color-background-secondary);padding:2px 6px;border-radius:4px}
+</style>
+<div class="mm-pills">
+  <button class="mm-btn on" onclick="mm_showMM(0,this)">Row-column dots</button>
+  <button class="mm-btn" onclick="mm_showMM(1,this)">Column-wise</button>
+  <button class="mm-btn" onclick="mm_showMM(2,this)">Outer product sum</button>
+</div>
+<mm_svg id="mm-mm_svg" width="100%" viewBox="0 0 680 200"></mm_svg>
+<div class="mm-desc" id="mm-desc"></div>
+<script>
+const mm_A=[[1,2],[3,4],[5,6]];
+const mm_B=[[7,8,9],[10,11,12]];
+const mm_C=mm_A.map(r=>mm_B[0].map((mm__,j)=>r.reduce((s,v,k)=>s+v*mm_B[k][j],0)));
+
+function mm_cell(x,y,w,h,v,mm_bg,mm_fg,mm_op){
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${mm_bg}" opacity="${mm_op||1}"/><text class="t" x="${x+w/2}" y="${y+h/2}" text-anchor="middle" dominant-baseline="central" fill="${mm_fg}" opacity="${mm_op||1}" style="font-family:var(--font-mono);font-size:12px">${v}</text>`;
+}
+
+function mm_showMM(mode,btn){
+  document.querySelectorAll('.mm-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const mm_svg=document.getElementById('mm-mm_svg');
+  const mm_cw=36,mm_ch=28,mm_g=2;
+  let s='';
+
+  const mm_ax=40,mm_ay=40;
+  s+=`<text class="ts" x="${mm_ax+mm_cw}" y="28" text-anchor="middle">mm_A (3×2)</text>`;
+  for(let i=0;i<3;i++)for(let j=0;j<2;j++){
+    let mm_bg='#EEEDFE',mm_fg='#3C3489',mm_op=1;
+    if(mode===0){mm_op=0.3;}
+    if(mode===1){mm_bg=j===0?'#E6F1FB':'#FAECE7';mm_fg=j===0?'#0C447C':'#712B13';mm_op=1;}
+    if(mode===2){mm_bg=j===0?'#E6F1FB':'#FAECE7';mm_fg=j===0?'#0C447C':'#712B13';}
+    s+=mm_cell(mm_ax+j*(mm_cw+mm_g),mm_ay+i*(mm_ch+mm_g),mm_cw,mm_ch,mm_A[i][j],mm_bg,mm_fg,mm_op);
+  }
+
+  const mm_bx=160,mm_by=40;
+  s+=`<text class="ts" x="${mm_bx+mm_cw*1.5+mm_g}" y="28" text-anchor="middle">mm_B (2×3)</text>`;
+  for(let i=0;i<2;i++)for(let j=0;j<3;j++){
+    let mm_bg='#E1F5EE',mm_fg='#085041',mm_op=1;
+    if(mode===0){mm_op=0.3;}
+    if(mode===1){mm_op=0.3;}
+    if(mode===2){mm_bg=i===0?'#E6F1FB':'#FAECE7';mm_fg=i===0?'#0C447C':'#712B13';}
+    s+=mm_cell(mm_bx+j*(mm_cw+mm_g),mm_by+i*(mm_ch+mm_g),mm_cw,mm_ch,mm_B[i][j],mm_bg,mm_fg,mm_op);
+  }
+
+  const mm_cx2=340,mm_cy2=40;
+  s+=`<text class="ts" x="${mm_cx2+mm_cw*1.5+mm_g}" y="28" text-anchor="middle">mm_C = AB (3×3)</text>`;
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++){
+    s+=mm_cell(mm_cx2+j*(mm_cw+mm_g),mm_cy2+i*(mm_ch+mm_g),mm_cw,mm_ch,mm_C[i][j],'#F1EFE8','#444441',1);
+  }
+
+  s+=`<text class="ts" x="${(mm_bx+2*(mm_cw+mm_g)+mm_cw+mm_cx2)/2}" y="${mm_cy2+mm_ch+mm_g+mm_ch/2}" text-anchor="middle" fill="var(--color-text-secondary)">=</text>`;
+  s+=`<text class="ts" x="${(mm_ax+2*(mm_cw+mm_g)+mm_bx)/2}" y="${mm_ay+mm_ch+mm_g+mm_ch/2}" text-anchor="middle" fill="var(--color-text-secondary)">×</text>`;
+
+  if(mode===0){
+    s+=`<rect x="${mm_ax}" y="${mm_ay}" width="${2*(mm_cw+mm_g)-mm_g}" height="${mm_ch}" rx="3" fill="none" stroke="#3C3489" stroke-width="1.5"/>`;
+    s+=`<rect x="${mm_bx}" y="${mm_by}" width="${mm_cw}" height="${2*(mm_ch+mm_g)-mm_g}" rx="3" fill="none" stroke="#085041" stroke-width="1.5"/>`;
+    s+=`<rect x="${mm_cx2}" y="${mm_cy2}" width="${mm_cw}" height="${mm_ch}" rx="3" fill="none" stroke="#A32D2D" stroke-width="1.5"/>`;
+    const mm_ey=140;
+    s+=`<text class="ts" x="40" y="${mm_ey}" fill="var(--color-text-primary)" style="font-family:var(--font-mono)">mm_C[0,0] = row₀(mm_A) · col₀(mm_B) = (1)(7) + (2)(10) = 27</text>`;
+    s+=`<text class="ts" x="40" y="${mm_ey+18}" fill="var(--color-text-secondary)">Each mm_C[i,j] = dot product of row i of mm_A with column j of mm_B</text>`;
+  }
+  if(mode===1){
+    s+=`<rect x="${mm_bx}" y="${mm_by}" width="${mm_cw}" height="${2*(mm_ch+mm_g)-mm_g}" rx="3" fill="none" stroke="#0C447C" stroke-width="1.5"/>`;
+    s+=`<rect x="${mm_cx2}" y="${mm_cy2}" width="${mm_cw}" height="${3*(mm_ch+mm_g)-mm_g}" rx="3" fill="none" stroke="#0C447C" stroke-width="1.5"/>`;
+    const mm_ey=140;
+    s+=`<text class="ts" x="40" y="${mm_ey}" fill="var(--color-text-primary)" style="font-family:var(--font-mono)">mm_C[:,0] = mm_A × mm_B[:,0] = mm_A × [7, 10]ᵀ = [27, 61, 95]ᵀ</text>`;
+    s+=`<text class="ts" x="40" y="${mm_ey+18}" fill="var(--color-text-secondary)">Each column of mm_C = mm_A times that column of mm_B (a mat-vec product)</text>`;
+  }
+  if(mode===2){
+    const mm_ey=140;
+    s+=`<text class="ts" x="40" y="${mm_ey}" fill="var(--color-text-primary)" style="font-family:var(--font-mono)">mm_C = col₀(mm_A) × row₀(mm_B) + col₁(mm_A) × row₁(mm_B)</text>`;
+    s+=`<text class="ts" x="40" y="${mm_ey+18}" fill="var(--color-text-secondary)">Sum of rank-1 outer products: each is a (3×1) × (1×3) = (3×3) matrix</text>`;
+  }
+
+  mm_svg.innerHTML=s;
+
+  const mm_descs=[
+    `<b>View 1 — Row-column dot products:</b> mm_C[i,j] = dot(row i of mm_A, col j of mm_B). This is the <b>definition</b>. You compute 3×3 = 9 dot products, one per output element. This is how you'd compute it mm_by hand.`,
+    `<b>View 2 — Column-wise:</b> Each column of mm_C is mm_A times the corresponding column of mm_B: <code>mm_C[:,j] = mm_A @ mm_B[:,j]</code>. This reduces matrix-matrix multiplication to multiple matrix-vector products. This is how GPUs parallelize it — process each column independently.`,
+    `<b>View 3 — Outer product sum:</b> mm_C = Σₖ col_k(mm_A) × row_k(mm_B). Each term is a rank-1 matrix (an outer product). mm_C is the sum of these simple building blocks. This view gives deep insight into the <b>structure</b> of the product — it's a sum of n simple rank-1 pieces.`
+  ];
+  document.getElementById('mm-desc').innerHTML=mm_descs[mode];
+}
+mm_showMM(0,document.querySelector('.mm-btn'));
+
+</script>

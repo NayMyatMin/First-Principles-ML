@@ -1,0 +1,68 @@
+<style>
+  .ti-pills{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+  .ti-btn{padding:6px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+  .ti-btn.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+  .ti-ti_desc{font-size:13px;color:var(--color-text-secondary);margin:8px 0 0;line-height:1.7}
+  .ti-ti_desc ti_b{font-weight:500;color:var(--color-text-primary)}
+  .ti-ti_desc code{font-size:12px;background:var(--color-background-secondary);padding:2px 6px;border-radius:4px}
+  .slab{display:inline-block;vertical-align:top;margin:4px 8px 4px 0}
+  .slab-title{font-size:11px;color:var(--color-text-secondary);margin:0 0 3px;font-family:var(--font-mono)}
+  .sg{display:grid;gap:1px}
+  .sc{width:30px;height:24px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:500;transition:all .2s}
+  .sc-off{background:var(--color-background-secondary);color:var(--color-text-secondary);opacity:0.4}
+  .sc-on{background:#E6F1FB;color:#0C447C}
+  .sc-hi{background:#EEEDFE;color:#3C3489}
+</style>
+<div class="ti-pills">
+  <button class="ti-btn on" onclick="ti_showSlice(0,this)">Full tensor (3,4,5)</button>
+  <button class="ti-btn" onclick="ti_showSlice(1,this)">ti_T[1] — one sample</button>
+  <button class="ti-btn" onclick="ti_showSlice(2,this)">ti_T[:,0,:] — first row of each</button>
+  <button class="ti-btn" onclick="ti_showSlice(3,this)">ti_T[:,j,j] — diagonals</button>
+</div>
+<div id="ti-vis"></div>
+<div class="ti-ti_desc" id="ti-ti_desc"></div>
+<script>
+const ti_T=[];
+for(let ti_b=0;ti_b<3;ti_b++){ti_T[ti_b]=[];for(let r=0;r<4;r++){ti_T[ti_b][r]=[];for(let c=0;c<5;c++)ti_T[ti_b][r][c]=ti_b*20+r*5+c;}}
+
+function ti_renderTensor(highlight){
+  let ti_html='';
+  for(let ti_b=0;ti_b<3;ti_b++){
+    ti_html+=`<div class="slab"><div class="slab-title">ti_T[${ti_b}]</div><div class="sg" style="grid-template-columns:repeat(5,1fr)">`;
+    for(let r=0;r<4;r++){
+      for(let c=0;c<5;c++){
+        const v=ti_T[ti_b][r][c];
+        const ti_cls=highlight(ti_b,r,c)?'sc-on':'sc-off';
+        ti_html+=`<div class="sc ${ti_cls}">${v}</div>`;
+      }
+    }
+    ti_html+=`</div></div>`;
+  }
+  return ti_html;
+}
+
+function ti_showSlice(mode,btn){
+  document.querySelectorAll('.ti-btn').forEach(ti_b=>ti_b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('ti-vis');
+  const ti_desc=document.getElementById('ti-ti_desc');
+
+  const ti_highlights=[
+    (ti_b,r,c)=>true,
+    (ti_b,r,c)=>ti_b===1,
+    (ti_b,r,c)=>r===0,
+    (ti_b,r,c)=>r===c && r<4 && c<4,
+  ];
+  el.innerHTML=ti_renderTensor(ti_highlights[mode]);
+
+  const ti_descs=[
+    `The full tensor has shape <ti_b>(3, 4, 5)</ti_b> — think of it as a batch of 3 matrices, each 4 rows by 5 columns. In ML terms: maybe 3 samples, each represented as a 4×5 feature map.`,
+    `<code>ti_T[1]</code> extracts the <ti_b>second matrix</ti_b> — shape (4, 5). This is like pulling one sample from a batch. You do this when you want to inspect a single example.`,
+    `<code>ti_T[:, 0, :]</code> extracts the <ti_b>first row of every matrix</ti_b> — shape (3, 5). The colon means "take everything along this axis." In RNNs, <code>batch[:, -1, :]</code> grabs the last time step from every sequence.`,
+    `<code>ti_T[:, j, j]</code> extracts the <ti_b>diagonal of each matrix</ti_b> — shape (3, 4). This uses fancy indexing: <code>ti_T[:, diag_idx, diag_idx]</code> where <code>diag_idx = [0,1,2,3]</code>. The highlighted cells show ti_T[ti_b,0,0], ti_T[ti_b,1,1], ti_T[ti_b,2,2], ti_T[ti_b,3,3] for each batch ti_b.`
+  ];
+  ti_desc.innerHTML=ti_descs[mode];
+}
+ti_showSlice(0,document.querySelector('.ti-btn'));
+
+</script>

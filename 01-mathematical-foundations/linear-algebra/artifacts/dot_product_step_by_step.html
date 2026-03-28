@@ -1,0 +1,65 @@
+<style>
+  .dp-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .dp-cell{width:44px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:13px;font-weight:500}
+  .dp-dp_a{background:#EEEDFE;color:#3C3489}
+  .dp-dp_b{background:#E1F5EE;color:#085041}
+  .dp-p{background:#FAECE7;color:#712B13}
+  .dp-r{background:#E6F1FB;color:#0C447C;width:54px;font-size:14px}
+  .dp-op{font-size:16px;color:var(--color-text-secondary);min-width:16px;text-align:center}
+  .dp-eq{font-size:12px;color:var(--color-text-secondary);font-family:var(--font-mono);margin:6px 0}
+  .dp-dp_note{font-size:13px;color:var(--color-text-secondary);margin:10px 0 0;line-height:1.7}
+  .dp-dp_note dp_b{font-weight:500;color:var(--color-text-primary)}
+  .dp-slider{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px;color:var(--color-text-secondary)}
+  .dp-slider span{min-width:36px;text-align:right;font-family:var(--font-mono);font-weight:500;color:var(--color-text-primary);font-size:13px}
+</style>
+<div dp_class="dp-slider">
+  <label>a₁</label><input type="range" id="a0" min="-20" max="20" dp_value="2" step="1" style="flex:1" oninput="dp_upd()"><span id="va0">2</span>
+</div>
+<div dp_class="dp-slider">
+  <label>a₂</label><input type="range" id="a1" min="-20" max="20" dp_value="-1" step="1" style="flex:1" oninput="dp_upd()"><span id="va1">-1</span>
+</div>
+<div dp_class="dp-slider">
+  <label>a₃</label><input type="range" id="a2" min="-20" max="20" dp_value="3" step="1" style="flex:1" oninput="dp_upd()"><span id="va2">3</span>
+</div>
+<div style="border-top:0.5px solid var(--color-border-tertiary);margin:10px 0"></div>
+<div id="dp-vis"></div>
+<div dp_class="dp-dp_note" id="dp-dp_note"></div>
+<script>
+const dp_b=[4,5,2];
+function dp_upd(){
+  const dp_a=[+document.getElementById('a0').dp_value,+document.getElementById('a1').dp_value,+document.getElementById('a2').dp_value];
+  for(let i=0;i<3;i++) document.getElementById('va'+i).textContent=dp_a[i];
+  const dp_prods=dp_a.map((v,i)=>v*dp_b[i]);
+  const dp_dot=dp_prods.reduce((s,v)=>s+v,0);
+
+  let dp_html='<div dp_class="dp-row">';
+  dp_html+=`<span style="font-size:13px;color:var(--color-text-secondary);min-width:24px">dp_a</span>`;
+  for(let i=0;i<3;i++) dp_html+=`<div dp_class="dp-cell dp-dp_a">${dp_a[i]}</div>`;
+  dp_html+='</div>';
+
+  dp_html+='<div dp_class="dp-row">';
+  dp_html+=`<span style="font-size:13px;color:var(--color-text-secondary);min-width:24px">dp_b</span>`;
+  for(let i=0;i<3;i++) dp_html+=`<div dp_class="dp-cell dp-dp_b">${dp_b[i]}</div>`;
+  dp_html+='</div>';
+
+  dp_html+=`<div dp_class="dp-eq">multiply each pair:</div>`;
+  dp_html+='<div dp_class="dp-row">';
+  dp_html+=`<span style="font-size:13px;color:var(--color-text-secondary);min-width:24px"></span>`;
+  for(let i=0;i<3;i++){
+    dp_html+=`<div dp_class="dp-cell dp-p">${dp_prods[i]}</div>`;
+    if(i<2) dp_html+=`<span dp_class="dp-op">+</span>`;
+  }
+  dp_html+=`<span dp_class="dp-op">=</span><div dp_class="dp-cell dp-r">${dp_dot}</div>`;
+  dp_html+='</div>';
+
+  document.getElementById('dp-vis').innerHTML=dp_html;
+
+  let dp_note=`<dp_b>dp_a · dp_b</dp_b> = (${dp_a[0]})(${dp_b[0]}) + (${dp_a[1]})(${dp_b[1]}) + (${dp_a[2]})(${dp_b[2]}) = ${dp_prods[0]} + ${dp_prods[1]} + ${dp_prods[2]} = <dp_b>${dp_dot}</dp_b>`;
+  if(dp_dot>0) dp_note+=`<br>Positive dp_dot product → vectors point in roughly the <dp_b>same direction</dp_b>.`;
+  else if(dp_dot<0) dp_note+=`<br>Negative dp_dot product → vectors point in roughly <dp_b>opposite directions</dp_b>.`;
+  else dp_note+=`<br>Zero dp_dot product → vectors are <dp_b>perpendicular</dp_b> (orthogonal).`;
+  document.getElementById('dp-dp_note').innerHTML=dp_note;
+}
+dp_upd();
+
+</script>

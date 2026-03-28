@@ -1,0 +1,81 @@
+<style>
+  .cv-ctrl{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px;color:var(--color-text-secondary)}
+  .cv-ctrl span{min-cv_width:42px;text-align:right;font-weight:500;font-size:14px}
+  .cv-info{font-size:13px;color:var(--color-text-secondary);margin:10px 0 0;line-height:1.7}
+  .cv-info b{color:var(--color-text-primary);font-weight:500}
+</style>
+<cv_svg cv_id="cv" cv_width="100%" cv_viewBox="0 0 680 400"></cv_svg>
+<div class="cv-ctrl">
+  <label style="min-cv_width:20px;font-weight:500;color:#0C447C">x₁</label>
+  <input type="range" cv_id="cx1" min="-20" max="30" value="15" step="1" style="flex:1" oninput="cv_cvUp()">
+  <span cv_id="cx1v" style="color:#0C447C">1.5</span>
+</div>
+<div class="cv-ctrl">
+  <label style="min-cv_width:20px;font-weight:500;color:#993C1D">x₂</label>
+  <input type="range" cv_id="cx2" min="-20" max="30" value="10" step="1" style="flex:1" oninput="cv_cvUp()">
+  <span cv_id="cx2v" style="color:#993C1D">1.0</span>
+</div>
+<div class="cv-info" cv_id="cv-info"></div>
+<script>
+const cv_col0=[2,1],cv_col1=[-1,2];
+const cv_cx=240,cv_cy=280,cv_sc=50;
+function cv_toS(v){return[cv_cx+v[0]*cv_sc,cv_cy-v[1]*cv_sc];}
+
+function cv_cvUp(){
+  const cv_x1=+document.getElementById('cx1').value/10;
+  const cv_x2=+document.getElementById('cx2').value/10;
+  document.getElementById('cx1v').textContent=cv_x1.toFixed(1);
+  document.getElementById('cx2v').textContent=cv_x2.toFixed(1);
+  const cv_sc0=[cv_x1*cv_col0[0],cv_x1*cv_col0[1]];
+  const cv_sc1=[cv_x2*cv_col1[0],cv_x2*cv_col1[1]];
+  const cv_res=[cv_sc0[0]+cv_sc1[0],cv_sc0[1]+cv_sc1[1]];
+
+  const cv_svg=document.getElementById('cv');
+  let s=`<defs><marker cv_id="ah" cv_viewBox="0 0 10 10" cv_refX="9" cv_refY="5" cv_markerWidth="7" cv_markerHeight="7" cv_orient="auto-start-reverse"><path cv_d="M2 1L8 5L2 9" cv_fill="none" cv_stroke="context-cv_stroke" cv_stroke-cv_width="1.5" cv_stroke-cv_linecap="round" cv_stroke-cv_linejoin="round"/></marker></defs>`;
+
+  for(let i=-4;i<=6;i++){
+    const cv_gx=cv_cx+i*cv_sc,cv_gy=cv_cy-i*cv_sc;
+    if(cv_gx>=40&&cv_gx<=640)s+=`<line cv_x1="${cv_gx}" y1="10" cv_x2="${cv_gx}" y2="390" cv_stroke="var(--color-border-tertiary)" cv_stroke-cv_width="0.3"/>`;
+    if(cv_gy>=10&&cv_gy<=390)s+=`<line cv_x1="40" y1="${cv_gy}" cv_x2="640" y2="${cv_gy}" cv_stroke="var(--color-border-tertiary)" cv_stroke-cv_width="0.3"/>`;
+  }
+  s+=`<line cv_x1="40" y1="${cv_cy}" cv_x2="640" y2="${cv_cy}" cv_stroke="var(--color-text-secondary)" cv_stroke-cv_width="0.4"/>`;
+  s+=`<line cv_x1="${cv_cx}" y1="10" cv_x2="${cv_cx}" y2="390" cv_stroke="var(--color-text-secondary)" cv_stroke-cv_width="0.4"/>`;
+
+  function arrow(cv_x1,y1,cv_x2,y2,c,w,op){
+    return `<line cv_x1="${cv_x1}" y1="${y1}" cv_x2="${cv_x2}" y2="${y2}" cv_stroke="${c}" cv_stroke-cv_width="${w}" opacity="${op||1}" marker-end="url(#ah)" cv_stroke-cv_linecap="round"/>`;
+  }
+
+  const [cv_c0x,c0y]=cv_toS(cv_col0);
+  const [cv_c1x,c1y]=cv_toS(cv_col1);
+  s+=arrow(cv_cx,cv_cy,cv_c0x,c0y,'#85B7EB',2,0.45);
+  s+=arrow(cv_cx,cv_cy,cv_c1x,c1y,'#F0997B',2,0.45);
+  s+=`<text class="ts" x="${cv_c0x+10}" y="${c0y-8}" cv_fill="#0C447C">col₁=[2,1]</text>`;
+  s+=`<text class="ts" x="${cv_c1x-8}" y="${c1y-10}" cv_fill="#993C1D" text-anchor="end">col₂=[-1,2]</text>`;
+
+  const [cv_s0x,s0y]=cv_toS(cv_sc0);
+  const [cv_endx,endy]=cv_toS(cv_res);
+  s+=arrow(cv_cx,cv_cy,cv_s0x,s0y,'#185FA5',2,0.55);
+  s+=arrow(cv_s0x,s0y,cv_endx,endy,'#D85A30',2,0.55);
+
+  s+=`<line cv_x1="${cv_s0x}" y1="${s0y}" cv_x2="${cv_endx}" y2="${s0y}" cv_stroke="var(--color-border-tertiary)" cv_stroke-cv_width="0.5" cv_stroke-dasharray="3 3"/>`;
+  s+=`<line cv_x1="${cv_endx}" y1="${s0y}" cv_x2="${cv_endx}" y2="${endy}" cv_stroke="var(--color-border-tertiary)" cv_stroke-cv_width="0.5" cv_stroke-dasharray="3 3"/>`;
+
+  s+=arrow(cv_cx,cv_cy,cv_endx,endy,'#A32D2D',3.5,1);
+
+  s+=`<text class="th" x="${cv_endx+(cv_endx>cv_cx?12:-12)}" y="${endy-12}" cv_fill="#A32D2D" text-anchor="${cv_endx>cv_cx?'start':'end'}" style="font-family:var(--font-mono);font-size:13px">Ax = [${cv_res[0].toFixed(1)}, ${cv_res[1].toFixed(1)}]</text>`;
+
+  const cv_mx1=(cv_cx+cv_s0x)/2, cv_my1=(cv_cy+s0y)/2;
+  s+=`<text class="ts" x="${cv_mx1+(cv_s0x>cv_cx?-14:14)}" y="${cv_my1-10}" cv_fill="#0C447C" text-anchor="${cv_s0x>cv_cx?'end':'start'}">${cv_x1.toFixed(1)} · col₁</text>`;
+  const cv_mx2=(cv_s0x+cv_endx)/2, cv_my2=(s0y+endy)/2;
+  s+=`<text class="ts" x="${cv_mx2+12}" y="${cv_my2-8}" cv_fill="#993C1D">${cv_x2.toFixed(1)} · col₂</text>`;
+
+  s+=`<text class="ts" x="480" y="40" cv_fill="var(--color-text-secondary)">A = [2, -1; 1, 2]</text>`;
+  s+=`<text class="ts" x="480" y="58" cv_fill="var(--color-text-secondary)">x = [${cv_x1.toFixed(1)}, ${cv_x2.toFixed(1)}]</text>`;
+
+  cv_svg.innerHTML=s;
+
+  document.getElementById('cv-info').innerHTML=`<b>Ax</b> = ${cv_x1.toFixed(1)} · <span style="color:#0C447C">[2, 1]</span> + ${cv_x2.toFixed(1)} · <span style="color:#993C1D">[-1, 2]</span> = <span style="color:#A32D2D"><b>[${cv_res[0].toFixed(1)}, ${cv_res[1].toFixed(1)}]</b></span>. The faded arrows are the two columns of A — the "template directions." The solid arrows show them scaled by x₁ and x₂, placed head-to-tail. The red arrow is their sum: the result.`;
+}
+cv_cvUp();
+
+</script>
