@@ -1,0 +1,1 @@
+- [Working folders are personal only](feedback_working_folders.md) — never generate content into Working/ folders; use named subfolders instead

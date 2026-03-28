@@ -46,3 +46,6 @@ data/
 logs/
 wandb/
 mlruns/
+
+# Personal working/practice folders
+**/Working/
